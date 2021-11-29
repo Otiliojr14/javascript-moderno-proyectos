@@ -1,6 +1,7 @@
 (function () {
 
     let DB;
+    const listadoClientes = document.querySelector('#listado-clientes');
 
     document.addEventListener('DOMContentLoaded', () => {
         crearDB();
@@ -8,8 +9,36 @@
         if (window.indexedDB.open('crm', 1)) {
             obtenerClientes();
         }
+
+        listadoClientes.addEventListener('click', eliminarRegistro);
     });
 
+    function eliminarRegistro(e) {
+        if (e.target.classList.contains('eliminar')) {
+            const idEliminar = Number(e.target.dataset.cliente);
+
+            const confirmar = confirm('Deseas eliminar este registro?');
+
+            if (confirmar) {
+                const transaction = DB.transaction(['crm'], 'readwrite');
+                const objectStore = transaction.objectStore('crm');
+
+                objectStore.delete(idEliminar);
+
+                transaction.oncomplete = function () {
+                    console.log('Eliminando');
+                    e.target.parentElement.parentElement.remove();
+                }
+
+                transaction.onerror = function () {
+                    console.log('Hubo un error');
+                }
+            }
+        }
+    }
+
+
+    // Crea la base de datos de IndexDB
     function crearDB() {
         const crearDB = window.indexedDB.open('crm', 1);
 
@@ -19,6 +48,7 @@
 
         crearDB.onsuccess = function () {
             DB = crearDB.result;
+            console.log(DB);
         }
 
         crearDB.onupgradeneeded = function (e) {
@@ -54,7 +84,6 @@
                 if (cursor) {
                     const {nombre, email, telefono, empresa, id} = cursor.value;
 
-                    const listadoClientes = document.querySelector('#listado-clientes');
                     listadoClientes.innerHTML += `
                     <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
                         <p class="text-sm leading-5 font-medium text-gray-700 text-lg  font-bold"> ${nombre} </p>
