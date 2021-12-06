@@ -13,7 +13,18 @@ function validarBusqueda(e) {
 
     if (busqueda.length < 3) {
         mostrarMensaje('Búsqueda muy corta... Añade más información');
+        return;
     }
+
+    consultarAPI(busqueda);
+}
+
+function consultarAPI(busqueda) {
+    const githubURL = `https://jobs.github.com/positions.json?search=${busqueda}`;
+    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(githubURL)}`;
+
+    axios.get(url)
+        .then( respuesta => console.log(respuesta));
 }
 
 function mostrarMensaje(msj) {
